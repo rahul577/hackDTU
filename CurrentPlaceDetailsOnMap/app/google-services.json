@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "881868009255",
+    "firebase_url": "https://hackdtu-d6823.firebaseio.com",
+    "project_id": "hackdtu-d6823",
+    "storage_bucket": "hackdtu-d6823.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881868009255:android:7c0a438ce15cc918",
+        "android_client_info": {
+          "package_name": "com.example.currentplacedetailsonmap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "881868009255-62ip0kq35igcvt27e476tbqj92lgo15j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6mTLxvw-SbTfXmo4t9qAcNPk09244k0w"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
