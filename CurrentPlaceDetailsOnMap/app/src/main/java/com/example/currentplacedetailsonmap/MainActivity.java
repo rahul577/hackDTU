@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Bitmap myBitmap= BitmapFactory.decodeResource(getResources(),R.drawable.sleeep);
+        final Bitmap myBitmap= BitmapFactory.decodeResource(getResources(),R.drawable.krituika);
         ImageView imageView=(ImageView)findViewById(R.id.imageView);
         Button button=(Button)findViewById(R.id.button);
         imageView.setImageBitmap(myBitmap);

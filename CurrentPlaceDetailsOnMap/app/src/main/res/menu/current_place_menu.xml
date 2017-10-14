@@ -12,13 +12,14 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/option_get_place"
-        android:title="Add a place"
+        android:id="@+id/face"
+        android:title="Face"
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/add"
-        android:title="Add"
-        app:showAsAction="always"/>
+        android:id="@+id/emotion"
+        android:title="Emotion"
+        app:showAsAction="collapseActionView"/>
 </menu>
