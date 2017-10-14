@@ -1,20 +1,21 @@
 package com.example.currentplacedetailsonmap;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,7 +48,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -109,6 +109,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
 
+
+
+
+
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private ShakeDetector mShakeDetector;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +128,28 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
+
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mShakeDetector = new ShakeDetector();
+        mShakeDetector.setOnShakeListener(new ShakeDetector.OnShakeListener() {
+
+            @Override
+            public void onShake(int count) {
+				/*
+				 * The following method, "handleShakeEvent(count):" is a stub //
+				 * method you would use to setup whatever you want done once the
+				 * device has been shook.
+				 */
+
+
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + "8039534505"));
+                startActivity(intent);
+                Toast.makeText(getApplicationContext(), "toast message",Toast.LENGTH_SHORT).show();
+            }
+        });
 
         mFirebaseDatabase = FirebaseDatabase.getInstance();
         mMessageDatabaseReference = mFirebaseDatabase.getReference().child("messages");
@@ -245,6 +276,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             }
         };
         mMessageDatabaseReference.addChildEventListener(mChildEventListener);
+
     }
 
     /**
@@ -274,6 +306,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                             .build();
 
                             mMap.moveCamera( CameraUpdateFactory.newCameraPosition(INIT) );
+                            getspeed(mLastKnownLocation);
+                            Log.i("IIIIIIIIIIIIIIIIIII", "is the speed working");
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
@@ -288,7 +322,12 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
             Log.e("Exception: %s", e.getMessage());
         }
     }
-
+    private void getspeed(Location location) {
+        //if (location.hasSpeed()) {
+            float speed = location.getSpeed();
+            Toast.makeText(getApplication(), "SPEED : " + String.valueOf(speed) + "m/s", Toast.LENGTH_SHORT).show();
+        //}
+    }
 
     /**
      * Prompts the user for permission to use the device location.
@@ -553,10 +592,43 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     }
 
+
     @Override
     public boolean onMarkerClick(Marker marker) {
         marker.setVisible(false);
         return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.current_place_menu,menu);
+        return true;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Add the following line to register the Session Manager Listener onResume
+        mSensorManager.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    public void onPause() {
+        // Add the following line to unregister the Sensor Manager onPause
+        mSensorManager.unregisterListener(mShakeDetector);
+        super.onPause();
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.speed_Exceeded:
+                Intent i = new Intent(this, TimerActivity.class);
+                startActivity(i);
+                break;
+            default:
+                //Do nothing
+
+        }
+        return true;
     }
 
 

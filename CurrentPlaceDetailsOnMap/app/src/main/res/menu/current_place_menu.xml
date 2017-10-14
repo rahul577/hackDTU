@@ -13,12 +13,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/option_get_place"
-        android:title="Add a place"
-        app:showAsAction="always"/>
+        android:id="@+id/speed_Exceeded"
+        android:title="Speed Exceeded" />
 
-    <item
-        android:id="@+id/add"
-        android:title="Add"
-        app:showAsAction="always"/>
 </menu>
