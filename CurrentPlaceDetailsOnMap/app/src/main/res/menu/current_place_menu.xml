@@ -12,8 +12,18 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/speed_Exceeded"
         android:title="Speed Exceeded" />
 
+  <item
+        android:id="@+id/face"
+        android:title="Face"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/emotion"
+        android:title="Emotion"
+        app:showAsAction="collapseActionView"/>
 </menu>

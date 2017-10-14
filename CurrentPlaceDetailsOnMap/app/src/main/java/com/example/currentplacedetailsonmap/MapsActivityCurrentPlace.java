@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -174,6 +175,29 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.current_place_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.face:
+                Intent i = new Intent(this, MainActivity.class);
+                startActivity(i);
+                return true;
+            case R.id.emotion:
+                Intent j = new Intent(this, Emotions.class);
+                startActivity(j);
+                return true;
+            default:
+                return true;
+        }
     }
 
     /**
