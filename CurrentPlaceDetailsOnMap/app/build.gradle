@@ -31,6 +31,7 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'com.google.android.gms:play-services:11.2.0'
+
     compile 'com.microsoft.projectoxford:vision:1.0.374'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.microsoft.projectoxford:emotion:1.0.355'
