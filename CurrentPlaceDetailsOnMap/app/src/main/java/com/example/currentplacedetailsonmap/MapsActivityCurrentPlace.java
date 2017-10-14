@@ -6,16 +6,21 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +42,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -49,7 +60,7 @@ import java.util.Locale;
  * An activity that displays a map showing the place at the device's current location.
  */
 public class MapsActivityCurrentPlace extends AppCompatActivity
-        implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+        implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerClickListener {
 
     static ArrayList<String> places = new ArrayList<>();
     static ArrayList<LatLng> locations = new ArrayList<>();
@@ -57,6 +68,17 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
+
+
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mMessageDatabaseReference;
+    private ChildEventListener mChildEventListener;
+
+    locationModel mlocationModel;
+
+    public String marklocation;
+    public int status_mark = 0;
+
 
     // The entry points to the Places API.
     private GeoDataClient mGeoDataClient;
@@ -90,12 +112,18 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mlocationModel = new locationModel();
 
         // Retrieve location and camera position from saved instance state.
         if (savedInstanceState != null) {
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
+
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        mMessageDatabaseReference = mFirebaseDatabase.getReference().child("messages");
+
+
 
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
@@ -113,6 +141,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
     }
 
@@ -180,6 +209,38 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+        mChildEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                locationModel locationm = dataSnapshot.getValue(locationModel.class);
+                Lat_Lng latLng= locationm.getLatlng();
+                com.google.android.gms.maps.model.LatLng mapsLatLng =
+                        new com.google.android.gms.maps.model.LatLng(latLng.getLatitude(),
+                                latLng.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(mapsLatLng).title(locationm.getMarkLocation()));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mMessageDatabaseReference.addChildEventListener(mChildEventListener);
     }
 
     /**
@@ -397,11 +458,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     public void onMapLongClick(LatLng latLng) {
         Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
+
+        getMarkLocation();
+
         String address = "";
 
         try {
 
             List<Address> listAddresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+
 
             if (listAddresses != null && listAddresses.size() > 0) {
 
@@ -431,14 +496,47 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         }
 
-        mMap.addMarker(new MarkerOptions().position(latLng).title(address));
+        //mMap.addMarker(new MarkerOptions().position(latLng).title(address));
 
         MapsActivityCurrentPlace.places.add(address);
         MapsActivityCurrentPlace.locations.add(latLng);
-
+        mlocationModel.setLatlng(latLng.latitude, latLng.longitude);
         //MapsActivityCurrentPlace.arrayAdapter.notifyDataSetChanged();
 
         Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
 
     }
+    private void getMarkLocation() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_layout, null);
+        dialogBuilder.setView(dialogView);
+        final EditText text = (EditText) dialogView.findViewById(R.id.markLocation);
+        dialogBuilder.setNegativeButton("Enter",  new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        mlocationModel.setMarkLocation(text.getText().toString());
+                        mMessageDatabaseReference.push().setValue(mlocationModel);
+                        dialog.cancel();
+                    }
+        });
+
+
+
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.setVisible(false);
+        return false;
+    }
+
+
 }
