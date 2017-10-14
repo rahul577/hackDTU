@@ -171,6 +171,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         mMap = map;
 
+        // use map to move camera into position
+      //  mMap.moveCamera( CameraUpdateFactory.newCameraPosition(INIT) );
+
+
         mMap.setOnMapLongClickListener(this);
 
         // Use a custom info window adapter to handle multiple lines of text in the
@@ -260,9 +264,16 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+
+                            CameraPosition INIT =
+                                    new CameraPosition.Builder()
+                                            .target(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()))
+                                            .zoom(17.5F)
+                                            .bearing(300F) // orientation
+                                            .tilt( 70F) // viewing angle
+                                            .build();
+
+                            mMap.moveCamera( CameraUpdateFactory.newCameraPosition(INIT) );
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
@@ -420,8 +431,18 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         .snippet(markerSnippet));
 
                 // Position the map's camera at the location of the marker.
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
-                        DEFAULT_ZOOM));
+               // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
+                //        DEFAULT_ZOOM));
+                CameraPosition INIT =
+                        new CameraPosition.Builder()
+                                .target(new LatLng(markerLatLng.latitude, markerLatLng.longitude))
+                                .zoom(17.5F)
+                                .bearing(300F) // orientation
+                                .tilt( 50F) // viewing angle
+                                .build();
+
+                mMap.moveCamera( CameraUpdateFactory.newCameraPosition(INIT) );
+
             }
         };
 
